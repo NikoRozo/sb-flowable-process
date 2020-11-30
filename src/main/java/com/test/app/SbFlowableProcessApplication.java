@@ -1,12 +1,11 @@
 package com.test.app;
 
-import org.flowable.engine.RepositoryService;
-import org.flowable.engine.RuntimeService;
-import org.flowable.engine.TaskService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+
+import com.test.app.services.SbFlowableService;
 
 @SpringBootApplication(proxyBeanMethods = false)
 public class SbFlowableProcessApplication {
@@ -16,21 +15,13 @@ public class SbFlowableProcessApplication {
 	}
 	
 	@Bean
-    public CommandLineRunner init(final RepositoryService repositoryService,
-                                  final RuntimeService runtimeService,
-                                  final TaskService taskService) {
+	public CommandLineRunner init(final SbFlowableService SbFlowableService) {
 
-        return new CommandLineRunner() {
-            @Override
-            public void run(String... strings) throws Exception {
-                System.out.println("Number of process definitions : "
-                    + repositoryService.createProcessDefinitionQuery().count());
-                System.out.println("Number of tasks : " + taskService.createTaskQuery().count());
-                runtimeService.startProcessInstanceByKey("oneTaskProcess");
-                System.out.println("Number of tasks after process start: "
-                    + taskService.createTaskQuery().count());
-            }
-        };
-    }
+	    return new CommandLineRunner() {
+	        public void run(String... strings) throws Exception {
+	        	SbFlowableService.createDemoUsers();
+	        }
+	    };
+	}
 
 }

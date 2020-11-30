@@ -52,6 +52,11 @@
 		    <version>${flowable.version}</version>
 		</dependency>
 		<dependency>
+		    <groupId>org.flowable</groupId>
+		    <artifactId>flowable-spring-boot-starter-actuator</artifactId>
+		    <version>${flowable.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>runtime</scope>
