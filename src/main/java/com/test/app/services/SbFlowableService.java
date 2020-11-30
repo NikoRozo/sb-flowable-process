@@ -5,8 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.flowable.engine.HistoryService;
+import org.flowable.engine.ProcessEngine;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
+import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,60 +25,76 @@ import com.test.app.repository.PersonRepository;
 public class SbFlowableService {
 
 	@Autowired
-    private RuntimeService runtimeService;
+	private RuntimeService runtimeService;
 
-    @Autowired
-    private TaskService taskService;
+	@Autowired
+	private ProcessEngine processEngine;
 
-    @Autowired
-    private PersonRepository personRepository;
+	@Autowired
+	private TaskService taskService;
 
-    public Map<String, String> startProcess(String assignee, HolidayRequest request) {
+	@Autowired
+	private PersonRepository personRepository;
 
-        Person person = personRepository.findByUsername(assignee);
+	public Map<String, String> startProcess(String assignee, HolidayRequest request) {
 
-        Map<String, Object> variables = new HashMap<String, Object>();
-        variables.put("person", person);
-        variables.put("employee", request.getEmployee());
+		Person person = personRepository.findByUsername(assignee);
+
+		Map<String, Object> variables = new HashMap<String, Object>();
+		variables.put("person", person);
+		variables.put("employee", request.getEmployee());
 		variables.put("nrOfHolidays", request.getNrOfHolidays());
 		variables.put("description", request.getDescription());
-        ProcessInstance inst = runtimeService.startProcessInstanceByKey("oneTaskProcess", variables);
-        Map<String, String> result = new HashMap<String, String>();
-        result.put("taksId", inst.getId());
-        return result;
-    }
+		ProcessInstance inst = runtimeService.startProcessInstanceByKey("oneTaskProcess", variables);
+		Map<String, String> result = new HashMap<String, String>();
+		result.put("taksId", inst.getId());
+		return result;
+	}
 
-    public List<Task> getTasks(String assignee) {
-        return taskService.createTaskQuery().taskAssignee(assignee).list();
-    }
+	public List<Task> getTasks(String assignee) {
+		return taskService.createTaskQuery().taskAssignee(assignee).list();
+	}
 
-    public void createDemoUsers() {
-        if (personRepository.findAll().size() == 0) {
-        	personRepository.save(new Person(null, "nrozo", "Nicolás", "Rozo", new Date()));
-        	personRepository.save(new Person(null, "jbarrez", "Joram", "Barrez", new Date()));
-            personRepository.save(new Person(null, "trademakers", "Tijs", "Rademakers", new Date()));
-        }
-    }
-    
-    public Map<String, Object> getTasksById(String taskid) {
-    	Task task = taskService.createTaskQuery().processInstanceId(taskid).list().get(0);
-    	Map<String, Object> processVariables = taskService.getVariables(task.getId());
-    	
-        return processVariables;
-    }
-    
-    
-    public Map<String, Object> completeTaskById(String taskid, Map<String, Object> variables) {
-    	Task task = taskService.createTaskQuery().processInstanceId(taskid).list().get(0);
+	public void createDemoUsers() {
+		if (personRepository.findAll().size() == 0) {
+			personRepository.save(new Person(null, "nrozo", "Nicolás", "Rozo", new Date()));
+			personRepository.save(new Person(null, "jbarrez", "Joram", "Barrez", new Date()));
+			personRepository.save(new Person(null, "trademakers", "Tijs", "Rademakers", new Date()));
+		}
+	}
+
+	public Map<String, Object> getTasksById(String taskid) {
+		Task task = taskService.createTaskQuery().processInstanceId(taskid).list().get(0);
+		Map<String, Object> processVariables = taskService.getVariables(task.getId());
+
+		return processVariables;
+	}
+
+	public Map<String, Object> completeTaskById(String taskid, Map<String, Object> variables) {
+		Task task = taskService.createTaskQuery().processInstanceId(taskid).list().get(0);
 
 		taskService.complete(task.getId(), variables);
-    	
-    	Map<String, Object> result = new HashMap<String, Object>();
-    	result.put("Status", "Complete");
-    	result.put("taksId", task.getId());
-        result.put("variable", variables);
-        
-        return result;
-    }
-    
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("Status", "Complete");
+		result.put("taksId", task.getId());
+		result.put("variable", variables);
+
+		return result;
+	}
+
+	public Map<String, Object> metrices(String id) {
+		HistoryService historyService = processEngine.getHistoryService();
+		List<HistoricActivityInstance> activities = historyService.createHistoricActivityInstanceQuery()
+				.processInstanceId(id).finished().orderByHistoricActivityInstanceEndTime().asc().list();
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		
+		for (HistoricActivityInstance activity : activities) {
+			System.out.println(activity.getActivityId() + " took " + activity.getDurationInMillis() + " milliseconds");
+			result.put(activity.getActivityId(), activity.getDurationInMillis() + " milliseconds");
+		}
+
+		return result;
+	}
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 import org.flowable.task.api.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,6 +53,13 @@ public class SbRestController {
     	Map<String, Object> task = SbFlowableService.completeTaskById(taskid, variables);
         
         return task;
+    }
+    
+    @GetMapping(value="/metrices")
+    public Map<String, Object> metricesTaskById(@RequestParam String taskid) {
+    	Map<String, Object> metrices = SbFlowableService.metrices(taskid);
+        
+        return metrices;
     }
 
     static class StartProcessRepresentation {
