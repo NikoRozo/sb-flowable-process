@@ -27,7 +27,10 @@ public class SbRestController {
 
     @PostMapping(value="/process")
     public Map<String, String> startProcessInstance(@RequestBody StartProcessRepresentation startProcessRepresentation) {
-    	return SbFlowableService.startProcess(startProcessRepresentation.getAssignee(), startProcessRepresentation.getRequest());
+    	return SbFlowableService.startProcess(startProcessRepresentation.getAssignee(), 
+    			new HolidayRequest(startProcessRepresentation.getEmployee(), 
+    					startProcessRepresentation.getNrOfHolidays(), 
+    					startProcessRepresentation.getDescription()));
     }
 
     @RequestMapping(value="/tasks", method= RequestMethod.GET, produces=MediaType.APPLICATION_JSON_VALUE)
@@ -51,7 +54,7 @@ public class SbRestController {
     @PostMapping(value="/complete")
     public Map<String, Object> completeTaskById(@RequestParam String taskid, @RequestBody Map<String, Object> variables) {
     	Map<String, Object> task = SbFlowableService.completeTaskById(taskid, variables);
-        
+        task.remove("person");
         return task;
     }
     
@@ -65,7 +68,9 @@ public class SbRestController {
     static class StartProcessRepresentation {
 
     	private String assignee;
-    	private HolidayRequest request;
+    	private String employee;
+    	private Integer nrOfHolidays;
+    	private String description;
     	
     	public String getAssignee() {
             return assignee;
@@ -75,13 +80,30 @@ public class SbRestController {
             this.assignee = assignee;
         }
         
-        public HolidayRequest getRequest() {
-        	return request;
+        public String getEmployee() {
+            return employee;
         }
 
-        public void setRequest(HolidayRequest request) {
-        	this.request = request;
+        public void setEmployee(String employee) {
+            this.employee = employee;
         }
+        
+        public Integer getNrOfHolidays() {
+            return nrOfHolidays;
+        }
+
+        public void setNrOfHolidays(Integer nrOfHolidays) {
+            this.nrOfHolidays = nrOfHolidays;
+        }
+        
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+        
     }
 
 }

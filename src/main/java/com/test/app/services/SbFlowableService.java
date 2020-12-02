@@ -64,6 +64,13 @@ public class SbFlowableService {
 	}
 
 	public Map<String, Object> getTasksById(String taskid) {
+		Task task = taskService.createTaskQuery().taskId(taskid).list().get(0);
+		Map<String, Object> processVariables = taskService.getVariables(task.getId());
+
+		return processVariables;
+	}
+	
+	public Map<String, Object> getTasksByIdInstance(String taskid) {
 		Task task = taskService.createTaskQuery().processInstanceId(taskid).list().get(0);
 		Map<String, Object> processVariables = taskService.getVariables(task.getId());
 
@@ -71,6 +78,19 @@ public class SbFlowableService {
 	}
 
 	public Map<String, Object> completeTaskById(String taskid, Map<String, Object> variables) {
+		Task task = taskService.createTaskQuery().taskId(taskid).list().get(0);
+
+		taskService.complete(task.getId(), variables);
+
+		Map<String, Object> result = new HashMap<String, Object>();
+		result.put("Status", "Complete");
+		result.put("taksId", task.getId());
+		result.put("variable", variables);
+
+		return result;
+	}
+	
+	public Map<String, Object> completeInstanceById(String taskid, Map<String, Object> variables) {
 		Task task = taskService.createTaskQuery().processInstanceId(taskid).list().get(0);
 
 		taskService.complete(task.getId(), variables);

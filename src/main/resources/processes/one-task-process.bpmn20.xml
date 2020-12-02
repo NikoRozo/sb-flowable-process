@@ -38,7 +38,7 @@
 	        flowable:class="com.test.app.delegate.CallExternalSystemDelegate"/>
 	    <sequenceFlow sourceRef="externalSystemCall" targetRef="holidayApprovedTask"/>
 	
-	    <userTask id="holidayApprovedTask" name="Holiday approved" flowable:assignee="${employee}"/>
+	    <userTask id="holidayApprovedTask" name="Holiday approved" flowable:assignee="${person.id}"/>
 	    <sequenceFlow sourceRef="holidayApprovedTask" targetRef="approveEnd"/>
 	
 	    <serviceTask id="sendRejectionMail" name="Send out rejection email"
